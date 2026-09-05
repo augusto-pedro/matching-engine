@@ -24,6 +24,27 @@ struct Order  // Order está sendo feita como struct e não class porquê em str
     OrderType type;
     PegReference peg_reference;
 
+    Order(){}
+    
+    Order
+    (
+        unsigned long long id,
+        OrderType type,
+        Side side,
+        int price,
+        int quantity,
+        unsigned long long priority,
+        PegReference peg_reference
+    )
+    {
+        this->id = id;
+        this->type = type;
+        this->side = side;
+        this->price = price;
+        this->quantity = quantity;
+        this->priority = priority;
+        this->peg_reference = peg_reference;
+    }
 };
 
 #endif
