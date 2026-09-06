@@ -3,7 +3,7 @@
 
 #include "order.hpp"
 
-class PriceLevel;  // Indica para o compilador que existe uma classe chamada PriceLevel e que ela será definida em outro lugar (é necessário porquê não estou fazendo #include "price_level.hpp")
+class PriceLevel;  // Indica para o compilador que existe uma classe chamada PriceLevel e que ela será definida em outro lugar (é necessário porque não estou fazendo #include "price_level.hpp")
 
 struct OrderNode
 {
@@ -11,7 +11,7 @@ struct OrderNode
     OrderNode *previous, *next;
     PriceLevel *level;
 
-    OrderNode(const Order &order)  // const indica que esse método não altera o objeto/parâmetro recebido  // usamos o endereço de order (&order) porquê queremos pegar a order original e não uma cópia (order) ou um ponteiro para order (*order)
+    OrderNode(const Order &order)  // const indica que esse método não altera o objeto/parâmetro recebido  // usamos o endereço de order (&order) porque queremos pegar a order original e não uma cópia (order) ou um ponteiro para order (*order)
     {
         this->order = order;
         this->previous = nullptr;

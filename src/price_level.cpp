@@ -87,7 +87,7 @@ void PriceLevel::insert_by_priority(OrderNode *node)
         return;
     }
 
-    OrderNode *current = this->head;  // não usamos new porquê não queremos criar um novo nó na memória, queremos apenas criar um ponteiro que aponta para um nó já existente
+    OrderNode *current = this->head;  // não usamos new porque não queremos criar um novo nó na memória, queremos apenas criar um ponteiro que aponta para um nó já existente
 
     while(current != nullptr && node->order.priority >= current->order.priority)
     {
