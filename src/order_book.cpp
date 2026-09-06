@@ -21,7 +21,7 @@ OrderNode *OrderBook::create_order(const Order &order)
 
 OrderNode *OrderBook::find_order(unsigned long long id)  // return this->orders_by_id[id]; não serve porque quando fazemos map[id], o map associa id a nullptr caso id não exista
 {
-    auto it = this->orders_by_id.find(id);  // auto é apenas uma forma de não precisar por o tipo explícito, porque nesse caso seria std::unordered_map<unsigned long long, OrderNode*>::iterator
+    auto it = this->orders_by_id.find(id);  // auto é apenas uma forma de não precisar por o tipo explícito, porque nesse caso seria std::unordered_map<unsigned long long, OrderNode*>::iterator  // it é um iterador que APONTA para a dupla desejada, caso exista
 
     if (it == orders_by_id.end())
     {
@@ -82,4 +82,45 @@ void OrderBook::add_to_book_by_priority(OrderNode *node)
         auto result = this->offers.try_emplace(price, price);
         result.first->second.insert_by_priority(node);
     }
+}
+
+void OrderBook::detach(OrderNode *node)
+{
+    if(node == nullptr || node->level == nullptr)
+    {
+        return;
+    }
+
+    int price = node->order.price;
+    Side side = node->order.side;
+    
+    PriceLevel *level = node->level;
+
+    level->detach(node);
+
+    if(level->empty())
+    {
+        if(side == Side::Buy)
+        {
+            this->bids.erase(price);
+        }
+        else
+        {
+            this->offers.erase(price);
+        }
+    }
+}
+
+void OrderBook::delete_order(OrderNode *node)
+{
+    if(node == nullptr)
+    {
+        return;
+    }
+
+    this->detach(node);  // tira a ordem do book
+    
+    this->orders_by_id.erase(node->order.id);  // tira a ordem do índice de IDs
+
+    delete node;  // destroi a ordem
 }
