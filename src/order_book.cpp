@@ -50,10 +50,36 @@ PriceLevel *OrderBook::best_offer()
     return &(this->offers.begin()->second);  // pega o mapa, pega a primeira dupla, pega o segundo elemento da primeira dupla e passa o endereço disso
 }
 
-/*void OrderBook::add_to_book(OrderNode *node)
+void OrderBook::add_to_book(OrderNode *node)
 {
-    if(node->order.side == Side::Buy)
+    int price = node->order.price;
+    Side side = node->order.side;
+
+    if(side == Side::Buy)
     {
-        this->bids[node->order.price] = node->level;
+        auto result = this->bids.try_emplace(price, price);  // try_emplace(a, b) é um método que mapas possuem que, caso a chave "a" não exista, ele cria um elemento com a chave sendo "a" e o "conteúdo" sendo "b", no caso "b" não é o conteúdo mas sim é passado como argumento para o PriceLevel, pois o mapa é chave sendo um int price e valor sendo um PriceLevel(int price). caso a chave "a" exista, ele não faz nada. result contém duas informações, result.first() é um iterador que APONTA para a dupla chave <-> valor gerada/encontrada e result.second() contém a informação se a dupla foi criada agora ou se já existia
+        result.first->second.append(node);
     }
-}*/
+    else
+    {
+        auto result = this->offers.try_emplace(price, price);
+        result.first->second.append(node);
+    }
+}
+
+void OrderBook::add_to_book_by_priority(OrderNode *node)
+{
+    int price = node->order.price;
+    Side side = node->order.side;
+
+    if(side == Side::Buy)
+    {
+        auto result = this->bids.try_emplace(price, price);
+        result.first->second.insert_by_priority(node);
+    }
+    else
+    {
+        auto result = this->offers.try_emplace(price, price);
+        result.first->second.insert_by_priority(node);
+    }
+}
