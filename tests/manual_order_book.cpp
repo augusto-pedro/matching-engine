@@ -171,6 +171,127 @@ int main()
         std::cout << "FIFO test passed!\n";
     }
 
+    // TEST 5 - detach
+    {
+        OrderBook book;
+
+        Order order1(
+            1,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            100,
+            1,
+            PegReference::None
+        );
+
+        Order order2(
+            2,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            200,
+            2,
+            PegReference::None
+        );
+
+        OrderNode *A = book.create_order(order1);
+        OrderNode *B = book.create_order(order2);
+
+        book.add_to_book(A);
+        book.add_to_book(B);
+
+        // Antes:
+        // 10.00 -> A <-> B
+
+        book.detach(A);
+
+        // Depois:
+        // 10.00 -> B
+        //
+        // A continua existindo, mas fora do book
+
+        assert(A->level == nullptr);
+        assert(A->previous == nullptr);
+        assert(A->next == nullptr);
+
+        assert(book.find_order(1) == A);
+
+        assert(book.best_bid() != nullptr);
+        assert(book.best_bid()->front() == B);
+        assert(book.best_bid()->get_size() == 1);
+
+        std::cout << "Detach test passed!\n";
+    }
+
+    // TEST 6 - removing empty PriceLevel
+    {
+        OrderBook book;
+
+        Order order(
+            1,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            100,
+            1,
+            PegReference::None
+        );
+
+        OrderNode *A = book.create_order(order);
+
+        book.add_to_book(A);
+
+        assert(book.best_bid() != nullptr);
+
+        book.detach(A);
+
+        assert(book.best_bid() == nullptr);
+
+        std::cout << "Empty PriceLevel removal test passed!\n";
+    }
+
+    // TEST 7 - delete_order
+    {
+        OrderBook book;
+
+        Order order1(
+            1,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            100,
+            1,
+            PegReference::None
+        );
+
+        Order order2(
+            2,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            200,
+            2,
+            PegReference::None
+        );
+
+        OrderNode *A = book.create_order(order1);
+        OrderNode *B = book.create_order(order2);
+
+        book.add_to_book(A);
+        book.add_to_book(B);
+
+        book.delete_order(A);
+
+        assert(book.find_order(1) == nullptr);
+
+        assert(book.best_bid() != nullptr);
+        assert(book.best_bid()->front() == B);
+        assert(book.best_bid()->get_size() == 1);
+
+        std::cout << "Delete order test passed!\n";
+    }
+
     std::cout << "\nAll OrderBook tests passed!\n";
 
     return 0;
