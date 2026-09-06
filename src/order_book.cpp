@@ -1,5 +1,23 @@
 #include "order_book.hpp"
 
+#include <iostream>
+#include <iomanip>
+#include <string>
+#include <sstream>
+
+std::string format_price(int price)  // pega um preço armazenado como inteiro e transforma em uma std::string no formato monetário com duas casas decimais
+{
+    std::ostringstream output;  // cria uma espécie de cout, só que em vez de imprimir na tela, ele monta uma "string" e armazena
+
+    output << price / 100            // pega os reais
+           << '.'                    // separador decimal
+           << std::setw(2)           // diz que o próximo valor inserido deve ocupar pelo menos 2 caracteres
+           << std::setfill('0')      // diz que, se faltar espaço para completar essa largura, esse espaço deve ser preenchido com 0
+           << price % 100;           // pega os centavos
+    
+    return output.str();  // .str() transforma o conteúdo em uma std::string
+}
+
 OrderBook::OrderBook() {};  // não precisa iniciar porque os hash maps já são criados vazios por padrão
 
 OrderBook::~OrderBook()
@@ -123,4 +141,64 @@ void OrderBook::delete_order(OrderNode *node)
     this->orders_by_id.erase(node->order.id);  // tira a ordem do índice de IDs
 
     delete node;  // destroi a ordem
+}
+
+void OrderBook::print_book()
+{
+    std::vector<std::string> buy_rows;  // linhas de compras
+    std::vector<std::string> sell_rows;  // linhas de vendas
+
+    for(auto it_level = this->bids.begin(); it_level != this->bids.end(); it_level++)  // percorre toda a coluna de compras
+    {
+        OrderNode *node = it_level->second.front();
+
+        while(node != nullptr)  // percorre todas as ordens de compra de um determinado preço
+        {
+            std::string row = std::to_string(node->order.quantity) + " @ " + format_price(node->order.price);  // cria uma string no formato "qty @ price"
+
+            buy_rows.push_back(row);  // coloca a string criada no nosso vetor de strings
+
+            node = node->next;  // vai para a próxima ordem do mesmo preço
+        }
+    }
+
+    for(auto it_level = this->offers.begin(); it_level != this->offers.end(); it_level++)  //percorre toda a coluna de vendas
+    {
+        OrderNode *node = it_level->second.front();
+
+        while(node != nullptr)  // percorre todas as ordens de venda de um determinado preço
+        {
+            std::string row = std::to_string(node->order.quantity) + " @ " + format_price(node->order.price);  // cria uma string no formato "qty @ price"
+
+            sell_rows.push_back(row);  // coloca a string criada no nosso vetor de strings
+
+            node = node->next;  // vai para a próxima ordem do mesmo preço
+        }
+    }
+
+    std::cout << "Ordens de Compra    | Ordens de Venda    \n";
+    std::cout << "--------------------|--------------------\n";
+
+    unsigned long long rows = (buy_rows.size() > sell_rows.size() ? buy_rows.size() : sell_rows.size());  // operador ternário, ele diz que, se tiverem mais linhas de compra, rows receberá esse número de linhas, caso contrário recebá o número de linhas de vendas
+
+    for(unsigned long long i = 0; i < rows; i++)
+    {
+        if(i < buy_rows.size())
+        {
+            std::cout << std::left << std::setw(20) << buy_rows[i];  // std::left alinha o próximo texto à esquerda e std::setw(20) reserva uma largura de 20 caracteres para o próximo valor impresso
+        }
+        else
+        {
+            std::cout << std::setw(20) << "";
+        }
+
+        std::cout << "| ";
+
+        if(i < sell_rows.size())
+        {
+            std::cout << sell_rows[i];  // aqui não precisa de std::left porque uma vez configurado ele só muda se mudarmos explicitamente, já std::setw(20) serve apenas para a próxima palavra, logo deve ser configurado em todo std::cout que se queira usar isso
+        }
+
+        std::cout << "\n";
+    }
 }
