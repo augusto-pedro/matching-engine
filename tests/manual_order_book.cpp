@@ -292,6 +292,75 @@ int main()
         std::cout << "Delete order test passed!\n";
     }
 
+    // TEST 8 - print book
+    {
+        OrderBook book;
+
+        Order buy1(
+            1,
+                OrderType::Limit,
+            Side::Buy,
+            1000,
+            100,
+            1,
+            PegReference::None
+        );
+
+        Order buy2(
+            2,
+            OrderType::Limit,
+            Side::Buy,
+            1010,
+            200,
+            2,
+            PegReference::None
+        );
+
+        Order buy3(
+            3,
+            OrderType::Limit,
+            Side::Buy,
+            1000,
+            150,
+            3,
+            PegReference::None
+        );
+
+        Order sell1(
+            4,
+            OrderType::Limit,
+            Side::Sell,
+            1050,
+            50,
+            4,
+            PegReference::None
+        );
+
+        Order sell2(
+            5,
+            OrderType::Limit,
+            Side::Sell,
+            1060,
+            300,
+            5,
+            PegReference::None
+        );
+
+        OrderNode *A = book.create_order(buy1);
+        OrderNode *B = book.create_order(buy2);
+        OrderNode *C = book.create_order(buy3);
+        OrderNode *D = book.create_order(sell1);
+        OrderNode *E = book.create_order(sell2);
+
+        book.add_to_book(A);
+        book.add_to_book(B);
+        book.add_to_book(C);
+        book.add_to_book(D);
+        book.add_to_book(E);
+
+        book.print_book();
+    }
+
     std::cout << "\nAll OrderBook tests passed!\n";
 
     return 0;
