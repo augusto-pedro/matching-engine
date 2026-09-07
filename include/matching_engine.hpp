@@ -23,6 +23,8 @@ public:
     std::vector<Trade> submit_market_order(Side side, int quantity);  // tenta executar a ordem contra o book e, se sobrar quantidade ou não, a destrói em seguida
 
     void print_book();
+
+    bool cancel_order(unsigned long long id);
 };
 
 #endif

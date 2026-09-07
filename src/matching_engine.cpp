@@ -117,3 +117,17 @@ void MatchingEngine::print_book()
 {
     this->book.print_book();
 }
+
+bool MatchingEngine::cancel_order(unsigned long long id)
+{
+    OrderNode *node = this->book.find_order(id);
+
+    if(node == nullptr)
+    {
+        return false;
+    }
+
+    this->book.delete_order(node);
+
+    return true;
+}
