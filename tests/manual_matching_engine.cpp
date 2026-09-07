@@ -58,7 +58,6 @@ int main()
         std::cout << "\nLimit matching test passed!\n";
     }
 
-
     // TEST 2 - Market matching
     {
         MatchingEngine engine;
@@ -121,6 +120,52 @@ int main()
         engine.print_book();
 
         std::cout << "\nMarket order test passed!\n";
+    }
+
+    // TEST 3 - Cancellation
+    {
+        MatchingEngine engine;
+
+        SubmissionResult buy1 = engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            100
+        );
+
+        SubmissionResult buy2 = engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            200
+        );
+
+        assert(buy1.order_id == 1);
+        assert(buy2.order_id == 2);
+
+        // Cancela a primeira ordem
+        assert(engine.cancel_order(1));
+
+        // Não pode cancelar novamente
+        assert(!engine.cancel_order(1));
+
+        // ID inexistente
+        assert(!engine.cancel_order(999));
+
+        // Se o cancelamento funcionou, uma market sell
+        // deve encontrar order_2, e não order_1.
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                50
+            );
+
+        assert(trades.size() == 1);
+        assert(trades[0].quantity == 50);
+        assert(trades[0].price == 1000);
+        assert(trades[0].buy_order_id == 2);
+
+        engine.print_book();
+
+        std::cout << "\nCancellation test passed!\n";
     }
 
     std::cout << "\nAll MatchingEngine tests passed!\n";
