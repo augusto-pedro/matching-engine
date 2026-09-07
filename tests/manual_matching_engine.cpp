@@ -1,6 +1,7 @@
 #include <cassert>
 #include <iostream>
 #include <vector>
+#include <stdexcept>
 
 #include "matching_engine.hpp"
 
@@ -525,6 +526,98 @@ int main()
         assert(trades[2].buy_order_id == peg.order_id);
 
         std::cout << "\nPeg quantity increase test passed!\n";
+    }
+
+    // TEST 13 - Invalid limit values
+    {
+        MatchingEngine engine;
+
+        bool caught_price = false;
+
+        try
+        {
+            engine.submit_limit_order(
+                Side::Buy,
+                0,
+                100
+            );
+        }
+        catch(const std::invalid_argument&)
+        {
+            caught_price = true;
+        }
+
+        assert(caught_price);
+
+        bool caught_quantity = false;
+
+        try
+        {
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                0
+            );
+        }
+        catch(const std::invalid_argument&)
+        {
+            caught_quantity = true;
+        }
+
+        assert(caught_quantity);
+
+        std::cout << "\nInvalid limit validation test passed!\n";
+    }
+
+    // TEST 14 - Invalid market quantity
+    {
+        MatchingEngine engine;
+
+        bool caught = false;
+
+        try
+        {
+            engine.submit_market_order(
+                Side::Buy,
+                0
+            );
+        }
+        catch(const std::invalid_argument&)
+        {
+            caught = true;
+        }
+
+        assert(caught);
+
+        std::cout << "\nInvalid market validation test passed!\n";
+    }
+
+    // TEST 15 - Peg cannot be modified through modify_order
+    {
+        MatchingEngine engine;
+
+        engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            100
+        );
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Bid,
+                100
+            );
+
+        ModificationResult result =
+            engine.modify_order(
+                peg.order_id,
+                2000,
+                100
+            );
+
+        assert(!result.success);
+
+        std::cout << "\nInvalid pegged price modification test passed!\n";
     }
 
     std::cout << "\nAll MatchingEngine tests passed!\n";
