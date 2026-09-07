@@ -6,6 +6,7 @@
 #include "order_book.hpp"
 #include "trade.hpp"
 #include "submission_result.hpp"
+#include "modification_result.hpp"
 
 class MatchingEngine
 {
@@ -25,6 +26,8 @@ public:
     void print_book();
 
     bool cancel_order(unsigned long long id);
+
+    ModificationResult modify_order(unsigned long long id, int new_price, int new_quantity);
 };
 
 #endif

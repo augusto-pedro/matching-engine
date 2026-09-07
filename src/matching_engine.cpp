@@ -131,3 +131,76 @@ bool MatchingEngine::cancel_order(unsigned long long id)
 
     return true;
 }
+
+ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_price, int new_quantity)
+{
+    OrderNode *node = this->book.find_order(id);
+
+    if(node == nullptr)
+    {
+        return ModificationResult(false, {});
+    }
+
+    bool price_changed = (node->order.price != new_price);  // se o preço antigo é diferente do novo, então price mudou
+    bool quantity_increased = (node->order.quantity < new_quantity);  // se a quantidade antiga é menor que a nova, então quantidade cresceu
+
+    if(!price_changed && !quantity_increased)  // mesmo preço mas quantidade não aumentou (prioridade continua, nos outros não)
+    {
+        node->order.quantity = new_quantity;
+
+        return ModificationResult(true, {});
+    }
+    else if(!price_changed && quantity_increased)  // mesmo preço mas quantidade aumentou (perde prioridade mas não causa trade)
+    {
+        this->book.detach(node);
+
+        node->order.quantity = new_quantity;
+        node->order.priority = this->next_priority++;
+
+        this->book.add_to_book(node);
+
+        return ModificationResult(true, {});
+    }
+    else if(price_changed && !quantity_increased)  // preço mudou e quantidade não aumentou (pode causar trade, lembrar que a quantidade não aumentar não significa que ela ficou constante)
+    {
+        this->book.detach(node);
+
+        node->order.price = new_price;
+        node->order.quantity = new_quantity;
+        node->order.priority = this->next_priority++;
+
+        std::vector<Trade> trades = this->match_order(node);
+
+        if(node->order.quantity > 0)
+        {
+            this->book.add_to_book(node);
+        }
+        else
+        {
+            this->book.delete_order(node);
+        }
+
+        return ModificationResult(true, trades);
+    }
+    else  // preço mudou e quantidade aumentou (pode causar trade)
+    {
+        this->book.detach(node);
+
+        node->order.price = new_price;
+        node->order.quantity = new_quantity;
+        node->order.priority = this->next_priority++;
+
+        std::vector<Trade> trades = this->match_order(node);
+
+        if(node->order.quantity > 0)
+        {
+            this->book.add_to_book(node);
+        }
+        else
+        {
+            this->book.delete_order(node);
+        }
+
+        return ModificationResult(true, trades);
+    }
+}
