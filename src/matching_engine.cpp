@@ -1,6 +1,7 @@
 #include "matching_engine.hpp"
 
 #include <algorithm>
+#include <stdexcept>
 
 MatchingEngine::MatchingEngine()
 {
@@ -10,6 +11,16 @@ MatchingEngine::MatchingEngine()
 
 SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int quantity)  // esse método cria uma ordem, tenta executá-la contra o book e, se sobrar quantidade, coloca o restante no book (além de retornar o ID da ordem e a lista de trades que ela gerou)
 {
+    if(price <= 0)
+    {
+        throw std::invalid_argument("Preço inválido");
+    }
+
+    if(quantity <= 0)
+    {
+        throw std::invalid_argument("Quantidade inválida");
+    }
+
     unsigned long long id = this->next_order_id++, priority = this->next_priority++;  // cria o id único e a prioridade temporal da nova ordem. Nesse caso o a = b++ joga o valor de 'b' em 'a' e depois incrementa 'b'
 
     Order order(id, OrderType::Limit, side, price, quantity, priority, PegReference::None);  // cria a ordem
@@ -34,6 +45,16 @@ SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int qu
 
 SubmissionResult MatchingEngine::submit_pegged_order(PegReference reference, int quantity)
 {
+    if (quantity < 0)
+    {
+        throw std::invalid_argument("Quantidade inválida");
+    }
+
+    if(reference != PegReference::Bid && reference != PegReference::Offer)
+    {
+        throw std::invalid_argument("Refernência da peg inválida");
+    }
+    
     unsigned long long id = this->next_order_id++, priority = this->next_priority++;
     Side side;
     PriceLevel *reference_level;
@@ -69,6 +90,11 @@ SubmissionResult MatchingEngine::submit_pegged_order(PegReference reference, int
 
 std::vector<Trade> MatchingEngine::submit_market_order(Side side, int quantity)
 {
+    if (quantity <= 0)
+    {
+        throw std::invalid_argument("Quantidade inválida");
+    }
+    
     unsigned long long id = this->next_order_id++, priority = this->next_priority++;
 
     Order order(id, OrderType::Market, side, 0, quantity, priority, PegReference::None);  // criamos a ordem com preço 0 porque como é Market, e o algoritmo sabe disso, o preço não influencia
