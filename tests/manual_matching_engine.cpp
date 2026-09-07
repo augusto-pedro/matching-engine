@@ -306,6 +306,55 @@ int main()
         std::cout << "\nModify order not found test passed!\n";
     }
 
+    // TEST 8 - Peg to bid repricing and priority
+    {
+        MatchingEngine engine;
+
+        SubmissionResult first =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                200
+            );
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Bid,
+                150
+            );
+
+        SubmissionResult better =
+            engine.submit_limit_order(
+                Side::Buy,
+                1010,
+                300
+            );
+
+        // Esperado em 10.10:
+        //
+        // peg (150) -> better (300)
+        //
+        // porque peg é mais antiga.
+
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                200
+            );
+
+        assert(trades.size() == 2);
+
+        assert(trades[0].price == 1010);
+        assert(trades[0].quantity == 150);
+        assert(trades[0].buy_order_id == peg.order_id);
+
+        assert(trades[1].price == 1010);
+        assert(trades[1].quantity == 50);
+        assert(trades[1].buy_order_id == better.order_id);
+
+        std::cout << "\nPeg bid repricing test passed!\n";
+    }
+
     std::cout << "\nAll MatchingEngine tests passed!\n";
 
     return 0;
