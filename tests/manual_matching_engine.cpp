@@ -168,6 +168,144 @@ int main()
         std::cout << "\nCancellation test passed!\n";
     }
 
+    // TEST 4 - Modify: quantity decrease keeps priority
+    {
+        MatchingEngine engine;
+
+        SubmissionResult first =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                100
+            );
+
+        SubmissionResult second =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                200
+            );
+
+        ModificationResult result =
+            engine.modify_order(
+                first.order_id,
+                1000,
+                50
+            );
+
+        assert(result.success);
+        assert(result.trades.empty());
+
+        // Se first manteve prioridade, market sell deve bater nela.
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                25
+            );
+
+        assert(trades.size() == 1);
+        assert(trades[0].buy_order_id == first.order_id);
+        assert(trades[0].quantity == 25);
+
+        std::cout << "\nModify quantity decrease test passed!\n";
+    }
+
+    // TEST 5 - Modify: quantity increase loses priority
+    {
+        MatchingEngine engine;
+
+        SubmissionResult first =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                100
+            );
+
+        SubmissionResult second =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                200
+            );
+
+        ModificationResult result =
+            engine.modify_order(
+                first.order_id,
+                1000,
+                150
+            );
+
+        assert(result.success);
+
+        // first perdeu prioridade.
+        // second agora deve ser executada primeiro.
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                50
+            );
+
+        assert(trades.size() == 1);
+        assert(trades[0].buy_order_id == second.order_id);
+
+        std::cout << "\nModify quantity increase test passed!\n";
+    }
+
+    // TEST 6 - Modify price triggers matching
+    {
+        MatchingEngine engine;
+
+        SubmissionResult buy =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                100
+            );
+
+        SubmissionResult sell =
+            engine.submit_limit_order(
+                Side::Sell,
+                1050,
+                100
+            );
+
+        ModificationResult result =
+            engine.modify_order(
+                buy.order_id,
+                1100,
+                100
+            );
+
+        assert(result.success);
+
+        assert(result.trades.size() == 1);
+        assert(result.trades[0].price == 1050);
+        assert(result.trades[0].quantity == 100);
+
+        // Ordem resting era a sell @ 10.50
+        assert(result.trades[0].buy_order_id == buy.order_id);
+        assert(result.trades[0].sell_order_id == sell.order_id);
+
+        std::cout << "\nModify price matching test passed!\n";
+    }
+
+    // TEST 7 - Modify missing order
+    {
+        MatchingEngine engine;
+
+        ModificationResult result =
+            engine.modify_order(
+                999,
+                1000,
+                100
+            );
+
+        assert(!result.success);
+        assert(result.trades.empty());
+
+        std::cout << "\nModify order not found test passed!\n";
+    }
+
     std::cout << "\nAll MatchingEngine tests passed!\n";
 
     return 0;
