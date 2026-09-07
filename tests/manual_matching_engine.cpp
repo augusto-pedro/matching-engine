@@ -439,6 +439,94 @@ int main()
         std::cout << "\nPeg offer repricing test passed!\n";
     }
 
+    // TEST 11 - Peg quantity decrease keeps priority
+    {
+        MatchingEngine engine;
+
+        engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            200
+        );
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Bid,
+                150
+            );
+
+        engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            300
+        );
+
+        assert(
+            engine.modify_pegged_order(
+                peg.order_id,
+                100
+            )
+        );
+
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                250
+            );
+
+        // A primeira limit é mais antiga que a peg.
+        assert(trades[0].buy_order_id == 1);
+
+        // Depois vem a peg.
+        assert(trades[1].buy_order_id == peg.order_id);
+
+        std::cout << "\nPeg quantity decrease test passed!\n";
+    }
+
+    // TEST 12 - Peg quantity increase loses priority
+    {
+        MatchingEngine engine;
+
+        engine.submit_limit_order(
+            Side::Buy,
+            1000,
+            200
+        );
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Bid,
+                150
+            );
+
+        SubmissionResult later =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                300
+            );
+
+        assert(
+            engine.modify_pegged_order(
+                peg.order_id,
+                200
+            )
+        );
+
+        // A peg perde prioridade e vai para trás de "later".
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                550
+            );
+
+        assert(trades[0].buy_order_id == 1);
+        assert(trades[1].buy_order_id == later.order_id);
+        assert(trades[2].buy_order_id == peg.order_id);
+
+        std::cout << "\nPeg quantity increase test passed!\n";
+    }
+
     std::cout << "\nAll MatchingEngine tests passed!\n";
 
     return 0;
