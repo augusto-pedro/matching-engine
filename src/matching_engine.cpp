@@ -45,7 +45,7 @@ SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int qu
 
 SubmissionResult MatchingEngine::submit_pegged_order(PegReference reference, int quantity)
 {
-    if (quantity < 0)
+    if (quantity <= 0)
     {
         throw std::invalid_argument("Quantidade inválida");
     }
