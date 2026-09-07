@@ -203,12 +203,7 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
 {
     OrderNode *node = this->book.find_order(id);
 
-    if(node == nullptr)
-    {
-        return ModificationResult(false, {});
-    }
-
-    if(node->order.type == OrderType::Pegged)
+    if(node == nullptr || node->order.type == OrderType::Pegged || new_price <= 0 || new_quantity <= 0)
     {
         return ModificationResult(false, {});
     }
