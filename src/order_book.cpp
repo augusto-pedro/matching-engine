@@ -203,6 +203,74 @@ void OrderBook::print_book()
     }
 }
 
+void OrderBook::print_book_aggregated()
+{
+    std::vector<std::string> buy_rows;  // linhas de compras
+    std::vector<std::string> sell_rows;  // linhas de vendas
+
+    for(auto it = this->bids.begin(); it != this->bids.end(); it++)
+    {
+        int total_quantity = 0;
+
+        OrderNode *node = it->second.front();
+
+        while(node != nullptr)
+        {
+            total_quantity = total_quantity + node->order.quantity;
+
+            node = node->next;
+        }
+
+        std::string row = std::to_string(total_quantity) + " @ " + format_price(it->first);
+
+        buy_rows.push_back(row);
+    }
+
+    for(auto it = this->offers.begin(); it != this->offers.end(); it++)
+    {
+        int total_quantity = 0;
+
+        OrderNode *node = it->second.front();
+
+        while(node != nullptr)
+        {
+            total_quantity = total_quantity + node->order.quantity;
+
+            node = node->next;
+        }
+
+        std::string row = std::to_string(total_quantity) + " @ " + format_price(it->first);
+
+        sell_rows.push_back(row);
+    }
+
+    std::cout << "Ordens de Compra    | Ordens de Venda    \n";
+    std::cout << "--------------------|--------------------\n";
+
+    unsigned long long rows = (buy_rows.size() > sell_rows.size() ? buy_rows.size() : sell_rows.size());
+
+    for(unsigned long long i = 0; i < rows; i++)
+    {
+        if(i < buy_rows.size())
+        {
+            std::cout << std::left << std::setw(20) << buy_rows[i];
+        }
+        else
+        {
+            std::cout << std::setw(20) << "";
+        }
+
+        std::cout << "| ";
+
+        if(i < sell_rows.size())
+        {
+            std::cout << sell_rows[i];
+        }
+
+        std::cout << "\n";
+    }
+}
+
 std::vector<OrderNode*> OrderBook::get_pegged_orders(PegReference reference)
 {
     std::vector<OrderNode*> pegged_orders;

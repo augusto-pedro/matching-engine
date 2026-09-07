@@ -33,6 +33,7 @@ public:
     PriceLevel *best_offer();
 
     void print_book();
+    void print_book_aggregated();
 
     std::vector<OrderNode*> get_pegged_orders(PegReference reference);  // pega todas as ordens pegged fixadas a uma referência
 };
