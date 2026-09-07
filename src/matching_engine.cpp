@@ -16,7 +16,7 @@ SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int qu
 
     OrderNode *node = this->book.create_order(order);  // cria o nó da fila de ordens
 
-    std::vector<Trade> trades = this->match_limit_order(node);  // tenta executar a ordem contra as ordens do lado oposto, essas execuções são guardadas em trades
+    std::vector<Trade> trades = this->match_order(node);  // tenta executar a ordem contra as ordens do lado oposto, essas execuções são guardadas em trades
 
     if(node->order.quantity > 0)
     {
@@ -30,7 +30,22 @@ SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int qu
     return SubmissionResult(id, trades);  // retorna o ID da ordem e a lista de trades que ela gerou
 }
 
-std::vector<Trade> MatchingEngine::match_limit_order(OrderNode *incoming)  // tenta executar a ordem contra as ordens do lado oposto, essas execuções são guardadas em um vetor de Trade
+std::vector<Trade> MatchingEngine::submit_market_order(Side side, int quantity)
+{
+    unsigned long long id = this->next_order_id++, priority = this->next_priority++;
+
+    Order order(id, OrderType::Market, side, 0, quantity, priority, PegReference::None);  // criamos a ordem com preço 0 porque como é Market, e o algoritmo sabe disso, o preço não influencia
+
+    OrderNode *node = this->book.create_order(order);
+
+    std::vector<Trade> trades = this->match_order(node);
+
+    this->book.delete_order(node);
+
+    return trades;
+}
+
+std::vector<Trade> MatchingEngine::match_order(OrderNode *incoming)  // tenta executar a ordem contra as ordens do lado oposto, essas execuções são guardadas em um vetor de Trade
 {
     std::vector<Trade> trades;
 
@@ -47,7 +62,7 @@ std::vector<Trade> MatchingEngine::match_limit_order(OrderNode *incoming)  // te
                 break;
             }
 
-            if(incoming->order.price < opposite_level->get_price())
+            if(incoming->order.type == OrderType::Limit && incoming->order.price < opposite_level->get_price())
             {
                 break;
             }
@@ -61,7 +76,7 @@ std::vector<Trade> MatchingEngine::match_limit_order(OrderNode *incoming)  // te
                 break;
             }
 
-            if(incoming->order.price > opposite_level->get_price())
+            if(incoming->order.type == OrderType::Limit && incoming->order.price > opposite_level->get_price())
             {
                 break;
             }
