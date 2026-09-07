@@ -355,6 +355,90 @@ int main()
         std::cout << "\nPeg bid repricing test passed!\n";
     }
 
+    // TEST 9 - Inactive peg becomes active
+    {
+        MatchingEngine engine;
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Bid,
+                150
+            );
+
+        // Não havia bid, então a peg está inativa.
+
+        SubmissionResult bid =
+            engine.submit_limit_order(
+                Side::Buy,
+                1000,
+                200
+            );
+
+        // submit_limit_order chama update_all_pegged_orders(),
+        // então agora a peg também deve estar em 10.00.
+
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Sell,
+                150
+            );
+
+        assert(trades.size() == 1);
+
+        // A peg é mais antiga que a limit.
+        assert(trades[0].buy_order_id == peg.order_id);
+        assert(trades[0].price == 1000);
+        assert(trades[0].quantity == 150);
+
+        std::cout << "\nInactive peg activation test passed!\n";
+    }
+
+    // TEST 10 - Peg to offer repricing and priority
+    {
+        MatchingEngine engine;
+
+        SubmissionResult first =
+            engine.submit_limit_order(
+                Side::Sell,
+                1050,
+                200
+            );
+
+        SubmissionResult peg =
+            engine.submit_pegged_order(
+                PegReference::Offer,
+                150
+            );
+
+        SubmissionResult better =
+            engine.submit_limit_order(
+                Side::Sell,
+                1040,
+                300
+            );
+
+        // Peg deve sair de 10.50 e acompanhar 10.40.
+        // Como é mais antiga que "better", fica na frente.
+
+        std::vector<Trade> trades =
+            engine.submit_market_order(
+                Side::Buy,
+                200
+            );
+
+        assert(trades.size() == 2);
+
+        assert(trades[0].price == 1040);
+        assert(trades[0].quantity == 150);
+        assert(trades[0].sell_order_id == peg.order_id);
+
+        assert(trades[1].price == 1040);
+        assert(trades[1].quantity == 50);
+        assert(trades[1].sell_order_id == better.order_id);
+
+        std::cout << "\nPeg offer repricing test passed!\n";
+    }
+
     std::cout << "\nAll MatchingEngine tests passed!\n";
 
     return 0;
