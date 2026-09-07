@@ -34,6 +34,8 @@ public:
     bool cancel_order(unsigned long long id);
 
     ModificationResult modify_order(unsigned long long id, int new_price, int new_quantity);
+
+    bool modify_pegged_order(unsigned long long id, int new_quantity);
 };
 
 #endif

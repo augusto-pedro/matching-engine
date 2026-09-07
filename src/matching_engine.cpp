@@ -254,6 +254,48 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
     }
 }
 
+bool MatchingEngine::modify_pegged_order(unsigned long long id, int new_quantity)
+{
+    OrderNode *node = this->book.find_order(id);
+    int old_quantity;
+    bool was_active;
+
+    if(node == nullptr)
+    {
+        return false;
+    }
+    
+    if(node->order.type != OrderType::Pegged)
+    {
+        return false;
+    }
+
+    old_quantity = node->order.quantity;
+    was_active = (node->level != nullptr);  // se o a ordem está em algum nível do book, então ela está ativa
+
+    if(new_quantity <= old_quantity)  // mantém prioridade e posição
+    {
+        node->order.quantity = new_quantity;
+
+        return true;
+    }
+
+    if(was_active)  // perde a prioridade e posição
+    {
+        this->book.detach(node);
+        node->order.priority = this->next_priority++;
+        node->order.quantity = new_quantity;
+        this->book.add_to_book(node);
+    }
+    else
+    {
+        node->order.priority = this->next_priority++;
+        node->order.quantity = new_quantity;
+    }
+
+    return true;
+}
+
 void MatchingEngine::update_pegged_orders(PegReference reference)
 {
     std::vector<OrderNode*> pegged_orders;
