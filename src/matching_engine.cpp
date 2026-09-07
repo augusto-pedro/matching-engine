@@ -208,6 +208,11 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
         return ModificationResult(false, {});
     }
 
+    if(node->order.type == OrderType::Pegged)
+    {
+        return ModificationResult(false, {});
+    }
+
     bool price_changed = (node->order.price != new_price);  // se o preço antigo é diferente do novo, então price mudou
     bool quantity_increased = (node->order.quantity < new_quantity);  // se a quantidade antiga é menor que a nova, então quantidade cresceu
 
