@@ -27,7 +27,44 @@ SubmissionResult MatchingEngine::submit_limit_order(Side side, int price, int qu
         this->book.delete_order(node);  // se não sobrar quantidade, deleta a ordem
     }
 
+    this->update_all_pegged_orders();
+
     return SubmissionResult(id, trades);  // retorna o ID da ordem e a lista de trades que ela gerou
+}
+
+SubmissionResult MatchingEngine::submit_pegged_order(PegReference reference, int quantity)
+{
+    unsigned long long id = this->next_order_id++, priority = this->next_priority++;
+    Side side;
+    PriceLevel *reference_level;
+    int price = 0;
+
+    if(reference == PegReference::Bid)
+    {
+        side = Side::Buy;
+        reference_level = this->book.best_bid();
+    }
+    else
+    {
+        side = Side::Sell;
+        reference_level = this->book.best_offer();
+    }
+
+    if(reference_level != nullptr)  // caso exista um nível de referência (book não vazio) a peg receberá esse preço
+    {
+        price = reference_level->get_price();
+    }
+
+    Order order(id, OrderType::Pegged, side, price, quantity, priority, reference);
+
+    OrderNode *node = this->book.create_order(order);
+
+    if(price > 0)  // se tudo deu certo ela é adicionada ao book, caso contrário teremos uma ordem na lista total de ordens mas fora do book por falta de referência
+    {
+        this->book.add_to_book(node);
+    }
+
+    return SubmissionResult(id, {});  // o vetor é vazio porque criar peg order não gera match
 }
 
 std::vector<Trade> MatchingEngine::submit_market_order(Side side, int quantity)
@@ -41,6 +78,8 @@ std::vector<Trade> MatchingEngine::submit_market_order(Side side, int quantity)
     std::vector<Trade> trades = this->match_order(node);
 
     this->book.delete_order(node);
+
+    this->update_all_pegged_orders();
 
     return trades;
 }
@@ -62,7 +101,7 @@ std::vector<Trade> MatchingEngine::match_order(OrderNode *incoming)  // tenta ex
                 break;
             }
 
-            if(incoming->order.type == OrderType::Limit && incoming->order.price < opposite_level->get_price())
+            if(incoming->order.type != OrderType::Market && incoming->order.price < opposite_level->get_price())
             {
                 break;
             }
@@ -76,7 +115,7 @@ std::vector<Trade> MatchingEngine::match_order(OrderNode *incoming)  // tenta ex
                 break;
             }
 
-            if(incoming->order.type == OrderType::Limit && incoming->order.price > opposite_level->get_price())
+            if(incoming->order.type != OrderType::Market && incoming->order.price > opposite_level->get_price())
             {
                 break;
             }
@@ -129,6 +168,8 @@ bool MatchingEngine::cancel_order(unsigned long long id)
 
     this->book.delete_order(node);
 
+    this->update_all_pegged_orders();
+
     return true;
 }
 
@@ -148,6 +189,8 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
     {
         node->order.quantity = new_quantity;
 
+        this->update_all_pegged_orders();
+
         return ModificationResult(true, {});
     }
     else if(!price_changed && quantity_increased)  // mesmo preço mas quantidade aumentou (perde prioridade mas não causa trade)
@@ -158,6 +201,8 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
         node->order.priority = this->next_priority++;
 
         this->book.add_to_book(node);
+
+        this->update_all_pegged_orders();
 
         return ModificationResult(true, {});
     }
@@ -180,6 +225,8 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
             this->book.delete_order(node);
         }
 
+        this->update_all_pegged_orders();
+
         return ModificationResult(true, trades);
     }
     else  // preço mudou e quantidade aumentou (pode causar trade)
@@ -201,6 +248,53 @@ ModificationResult MatchingEngine::modify_order(unsigned long long id, int new_p
             this->book.delete_order(node);
         }
 
+        this->update_all_pegged_orders();
+
         return ModificationResult(true, trades);
     }
+}
+
+void MatchingEngine::update_pegged_orders(PegReference reference)
+{
+    std::vector<OrderNode*> pegged_orders;
+    PriceLevel *reference_level;
+    int new_price;
+
+    if(reference == PegReference::Bid)
+    {
+        reference_level = this->book.best_bid();
+    }
+    else
+    {
+        reference_level = this->book.best_offer();
+    }
+
+    if(reference_level == nullptr)  // se não existir preço de referência, nada acontece
+    {
+        return;
+    }
+
+    new_price = reference_level->get_price();
+
+    pegged_orders = this->book.get_pegged_orders(reference);
+
+    for(auto it = pegged_orders.begin(); it != pegged_orders.end(); it++)
+    {
+        OrderNode *node = *it;  // it é um objeto do tipo iterador do vector. Já *it é o conteúdo desse iterador (que no caso é um *node_atual)
+    
+        if(node->order.price == new_price)
+        {
+            continue;
+        }
+
+        this->book.detach(node);
+        node->order.price = new_price;
+        this->book.add_to_book_by_priority(node);
+    }
+}
+
+void MatchingEngine::update_all_pegged_orders()
+{
+    this->update_pegged_orders(PegReference::Bid);
+    this->update_pegged_orders(PegReference::Offer);
 }

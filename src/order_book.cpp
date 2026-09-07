@@ -202,3 +202,20 @@ void OrderBook::print_book()
         std::cout << "\n";
     }
 }
+
+std::vector<OrderNode*> OrderBook::get_pegged_orders(PegReference reference)
+{
+    std::vector<OrderNode*> pegged_orders;
+
+    for(auto it = this->orders_by_id.begin(); it != this->orders_by_id.end(); it++)
+    {
+        OrderNode *node = it->second;
+
+        if(node->order.type == OrderType::Pegged && node->order.peg_reference == reference)
+        {
+            pegged_orders.push_back(node);
+        }
+    }
+
+    return pegged_orders;
+}

@@ -3,6 +3,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <vector>
 #include <functional>
 
 #include "price_level.hpp"
@@ -32,6 +33,8 @@ public:
     PriceLevel *best_offer();
 
     void print_book();
+
+    std::vector<OrderNode*> get_pegged_orders(PegReference reference);  // pega todas as ordens pegged fixadas a uma referência
 };
 
 #endif
