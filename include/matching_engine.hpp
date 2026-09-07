@@ -31,6 +31,8 @@ public:
 
     void print_book();
 
+    void print_book_aggregated();
+
     bool cancel_order(unsigned long long id);
 
     ModificationResult modify_order(unsigned long long id, int new_price, int new_quantity);

@@ -183,6 +183,11 @@ void MatchingEngine::print_book()
     this->book.print_book();
 }
 
+void MatchingEngine::print_book_aggregated()
+{
+    this->book.print_book_aggregated();
+}
+
 bool MatchingEngine::cancel_order(unsigned long long id)
 {
     OrderNode *node = this->book.find_order(id);
