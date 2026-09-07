@@ -25,8 +25,8 @@ public:
     void add_to_book(OrderNode *node);  // 
     void add_to_book_by_priority(OrderNode *node);
 
-    void detach(OrderNode *node);
-    void delete_order(OrderNode *node);
+    void detach(OrderNode *node);  // apenas destaca a ordem mas não a destroi
+    void delete_order(OrderNode *node);  // destaca, tira do índice de ordens e destroi
 
     PriceLevel *best_bid();
     PriceLevel *best_offer();
