@@ -8,7 +8,7 @@ enum class Side  // cria um tipo de objeto (Side) que só pode assumir um conjun
 
 enum class OrderType
 {
-    Limit, Pegged
+    Limit, Market, Pegged
 };
 
 enum class PegReference
