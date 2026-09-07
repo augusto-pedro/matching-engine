@@ -95,7 +95,7 @@ bool parser_price(const std::string &text, int &price)  // converte um texto par
     return true;
 }
 
-bool parser_quantity(static std::string &text, int &quantity)  // converte um texto para uma quantidade
+bool parser_quantity(const std::string &text, int &quantity)  // converte um texto para uma quantidade
 {
     if(text.empty())
     {
@@ -112,7 +112,7 @@ bool parser_quantity(static std::string &text, int &quantity)  // converte um te
 
     long long value = std::stoll(text);
 
-    if(value < 0 || value > std::numeric_limits<int>::max())
+    if(value <= 0 || value > std::numeric_limits<int>::max())
     {
         return false;
     }
@@ -140,13 +140,13 @@ bool parser_order(const std::string &text, unsigned long long &id)
 
     for(int i = 0; i < number.size(); i++)
     {
-        if(number[i] < 'o' || number[i] > '9')
+        if(number[i] < '0' || number[i] > '9')
         {
             return false;
         }
     }
 
-    id = std::stoll(number);
+    id = std::stoull(number);  // converte a string para um unsigned long long. stoull é [S]tring [TO] [U]nsigned [L]ong [L]ong
 
     return id > 0;  // se id > 0 retorna true
 }
