@@ -6,6 +6,7 @@
 #include <limits>
 
 #include "matching_engine.hpp"
+#include "utils.hpp"
 
 bool parser_side(const std::string &text, Side &side);  // converte um texto para compra ou venda. Recebe um texto e se esse texto for buy ou sell, a variável side receberá Side::Buy ou Side::sell
 
@@ -66,6 +67,44 @@ int main()
                 << "print book aggregated\n"
                 << "exit\n\n";
             
+            continue;
+        }
+
+        if(command == "limit")
+        {
+            std::string side_text, price_text, quantity_text;
+
+            input >> side_text >> price_text >> quantity_text;  // pega a segunda, terceira e quarta palavra de input e coloca nessas strings
+            
+            Side side;
+            int price, quantity;
+
+            if(!parser_side(side_text, side) || !parser_price(price_text, price) || !parser_quantity(quantity_text, quantity))
+            {
+                std::cout << "Invalid command\n\n";
+
+                continue;
+            }
+
+            try
+            {
+                SubmissionResult result = engine.submit_limit_order(side, price, quantity);
+
+                std::cout
+                    << "Order created: "
+                    << side_text << " "
+                    << quantity
+                    << " @ "
+                    << format_price(price)
+                    << " order_"
+                    << result.order_id
+                    << "\n\n";
+            }
+            catch(const std::exception &error)
+            {
+                std::cout << "Error: " << error.what() << "\n\n";
+            }
+
             continue;
         }
 
