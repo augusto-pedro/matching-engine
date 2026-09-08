@@ -56,18 +56,18 @@ int main()
         if(command == "help")
         {
             std::cout 
-                << "limit buy <price> <qty>\n"
-                << "limit sell <price> <qty>\n"
-                << "market buy <qty>\n"
-                << "market sell <qty>\n"
-                << "peg bid buy <qty>\n"
-                << "peg offer sell <qty>\n"
-                << "cancel order <order_id>\n"
-                << "modify order <order_id> <price> <qty>\n"
-                << "modify peg <order_id> <qty>\n"
-                << "print book\n"
-                << "print book aggregated\n"
-                << "exit\n\n";
+                << "limit buy <price> <qty>\n"                         //falta aquele detalhe
+                << "limit sell <price> <qty>\n"                        //falta aquele detalhe
+                << "market buy <qty>\n"                                //ok
+                << "market sell <qty>\n"                               //ok
+                << "peg bid buy <qty>\n"                               //
+                << "peg offer sell <qty>\n"                            //
+                << "cancel order <order_id>\n"                         //ok
+                << "modify order <order_id> <price> <qty>\n"           //ok
+                << "modify peg <order_id> <qty>\n"                     //
+                << "print book\n"                                      //ok
+                << "print book aggregated\n"                           //ok
+                << "exit\n\n";                                         //ok
             
             continue;
         }
@@ -199,6 +199,48 @@ int main()
             }
 
             continue;
+        }
+
+        if(command == "modify")
+        {
+            std::string type;
+
+            input >> type;
+
+            if(type == "order")
+            {
+                std::string id_text, price_text, quantity_text;
+                unsigned long long id;
+                int price, quantity;
+
+                ModificationResult result;
+
+                input >> id_text >> price_text >> quantity_text;
+
+                if(!parser_order(id_text, id) || !parser_price(price_text, price) || !parser_quantity(quantity_text, quantity))
+                {
+                    std::cout << "Invalid command \n\n";
+
+                    continue;
+                }
+
+                result = engine.modify_order(id, price, quantity);
+
+                if(!result.success)
+                {
+                    std::cout << "Order not found\n\n";
+
+                    continue;
+                }
+
+                std::cout << "Order modified\n";
+
+                print_trades(result.trades);
+
+                std::cout << "\n";
+
+                continue;
+            }
         }
 
         std::cout << "Invalid command\n\n";
