@@ -169,7 +169,10 @@ int main()
 
                 print_trades(trades);
 
-                std::cout << "\n";
+                if(!trades.empty())
+                {
+                    std::cout << "\n";
+                }
             }
             catch(const std::exception &error)
             {
