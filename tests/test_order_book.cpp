@@ -292,7 +292,7 @@ int main()
         std::cout << "Delete order test passed!\n";
     }
 
-    // TEST 8 - print book
+    // TEST 8 - print book  // Manual visualization test
     {
         OrderBook book;
 
