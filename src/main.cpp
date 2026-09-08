@@ -64,7 +64,7 @@ int main()
                 << "peg offer sell <qty>\n"                            //ok
                 << "cancel order <order_id>\n"                         //ok
                 << "modify order <order_id> <price> <qty>\n"           //ok
-                << "modify peg <order_id> <qty>\n"                     //
+                << "modify peg <order_id> <qty>\n"                     //ok
                 << "print book\n"                                      //ok
                 << "print book aggregated\n"                           //ok
                 << "exit\n\n";                                         //ok
@@ -219,7 +219,7 @@ int main()
 
                 if(!parser_order(id_text, id) || !parser_price(price_text, price) || !parser_quantity(quantity_text, quantity))
                 {
-                    std::cout << "Invalid command \n\n";
+                    std::cout << "Invalid command\n\n";
 
                     continue;
                 }
@@ -241,6 +241,36 @@ int main()
 
                 continue;
             }
+
+            if(type == "peg")
+            {
+                std::string id_text, quantity_text;
+                unsigned long long id;
+                int quantity;
+
+                input >> id_text >> quantity_text;
+
+                if(!parser_order(id_text, id) || !parser_quantity(quantity_text, quantity))
+                {
+                    std::cout << "Invalid command\n\n";
+                    continue;
+                }
+
+                if(engine.modify_pegged_order(id, quantity))
+                {
+                    std::cout << "Order modified\n\n";
+                }
+                else
+                {
+                    std::cout << "Order not found\n\n";
+                }
+
+                continue;
+            }
+
+            std::cout << "Invalid command\n\n";
+
+            continue;
         }
 
         if(command == "peg")
