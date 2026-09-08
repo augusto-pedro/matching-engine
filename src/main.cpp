@@ -142,6 +142,39 @@ int main()
             continue;
         }
 
+        if(command == "market")
+        {
+            std::string side_text, quantity_text;
+            Side side;
+            int quantity;
+
+            input >> side_text >> quantity_text;
+
+            if(!parser_side(side_text, side) || !parser_quantity(quantity_text, quantity))
+            {
+                std::cout << "Invalis command\n";
+
+                continue;
+            }
+
+            try
+            {
+                std::vector<Trade> trades;
+
+                trades = engine.submit_market_order(side, quantity);
+
+                print_trades(trades);
+
+                std::cout << "\n";
+            }
+            catch(const std::exception &error)
+            {
+                std::cout << "Error: " << error.what() << "\n\n";
+            }
+
+            continue;
+        }
+
         std::cout << "Invalid command\n\n";
     }
 
