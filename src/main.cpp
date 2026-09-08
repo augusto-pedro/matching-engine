@@ -175,6 +175,32 @@ int main()
             continue;
         }
 
+        if(command == "cancel")
+        {
+            std::string word, id_text;
+            unsigned long long id;
+
+            input >> word >> id_text;
+
+            if(word != "order" || !parser_order(id_text, id))
+            {
+                std::cout << "Invalid command\n\n";
+
+                continue;
+            }
+
+            if(engine.cancel_order(id))
+            {
+                std::cout << "Order cancelled\n\n";
+            }
+            else
+            {
+                std::cout << "Order not found\n\n";
+            }
+
+            continue;
+        }
+
         std::cout << "Invalid command\n\n";
     }
 
