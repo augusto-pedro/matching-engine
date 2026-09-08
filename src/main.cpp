@@ -110,6 +110,38 @@ int main()
             continue;
         }
 
+        if(command == "print")
+        {
+            std::string what, option;
+
+            input >> what;
+
+            if(what != "book")
+            {
+                std::cout << "Invalid command\n\n";
+                continue;
+            }
+
+            input >> option;
+
+            if(option.empty())
+            {
+                engine.print_book();
+            }
+            else if(option == "aggregated")
+            {
+                engine.print_book_aggregated();
+            }
+            else
+            {
+                std::cout << "Invalid command\n";
+            }
+
+            std::cout << "\n";
+
+            continue;
+        }
+
         std::cout << "Invalid command\n\n";
     }
 
