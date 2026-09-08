@@ -156,7 +156,7 @@ int main()
 
             if(!parser_side(side_text, side) || !parser_quantity(quantity_text, quantity))
             {
-                std::cout << "Invalid command\n";
+                std::cout << "Invalid command\n\n";
 
                 continue;
             }
