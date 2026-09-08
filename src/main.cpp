@@ -156,7 +156,7 @@ int main()
 
             if(!parser_side(side_text, side) || !parser_quantity(quantity_text, quantity))
             {
-                std::cout << "Invalis command\n";
+                std::cout << "Invalid command\n";
 
                 continue;
             }
@@ -355,7 +355,7 @@ bool parser_side(const std::string &text, Side &side)  // converte um texto para
 
 bool parser_price(const std::string &text, int &price)  // converte um texto para um preço em centavos
 {
-    std::size_t dot;  // é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices
+    std::size_t dot;  // é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices/posições
     std::string whole, decimal;
 
     dot = text.find('.');  // .find() procura o caractere dentro da string e retorna a posição/índice onde ele foi enocntrado
@@ -381,7 +381,7 @@ bool parser_price(const std::string &text, int &price)  // converte um texto par
         return false;
     }
 
-    for(int i = 0; i < whole.size(); i++)  // percorre a string
+    for(std::size_t i = 0; i < whole.size(); i++)  // percorre a string  // std::size_t é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices/posições
     {
         if(whole[i] < '0' || whole[i] > '9')  // verifica se a parte inteira é número
         {
@@ -389,7 +389,7 @@ bool parser_price(const std::string &text, int &price)  // converte um texto par
         }
     }
 
-    for(int i = 0; i < decimal.size(); i++)
+    for(std::size_t i = 0; i < decimal.size(); i++)  // std::size_t é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices/posições
     {
         if(decimal[i] < '0' || decimal[i] > '9')
         {
@@ -429,7 +429,7 @@ bool parser_quantity(const std::string &text, int &quantity)  // converte um tex
         return false;
     }
 
-    for(int i = 0; i < text.size(); i++)
+    for(std::size_t i = 0; i < text.size(); i++)  // std::size_t é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices/posições
     {
         if(text[i] < '0' || text[i] > '9')
         {
@@ -465,7 +465,7 @@ bool parser_order(const std::string &text, unsigned long long &id)  // converte 
         return false;
     }
 
-    for(int i = 0; i < number.size(); i++)
+    for(std::size_t i = 0; i < number.size(); i++)  // std::size_t é um tipo inteiro e sem sinal usado para representar tamanhos, quantidades e índices/posições
     {
         if(number[i] < '0' || number[i] > '9')
         {
