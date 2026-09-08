@@ -16,6 +16,8 @@ bool parser_quantity(const std::string &text, int &quantity);  // converte um te
 
 bool parser_order(const std::string &text, unsigned long long &id);  // converte um texto para o ID de uma ordem
 
+void print_trades(const std::vector<Trade> &trades);  // recebe um vetor de trades imprime todos os trades feitos, agregando os que tem o mesmo valor 
+
 int main()
 {
     MatchingEngine engine;
@@ -258,3 +260,32 @@ bool parser_order(const std::string &text, unsigned long long &id)  // converte 
     return id > 0;  // se id > 0 retorna true
 }
 
+void print_trades(const std::vector<Trade> &trades)  // recebe um vetor de trades imprime todos os trades feitos, agregando os que tem o mesmo valor
+{
+    if(trades.empty())
+    {
+        return;
+    }
+
+    int current_price;
+    long long total_quantity = 0;
+
+    current_price = trades[0].price;
+
+    for(auto it = trades.begin(); it != trades.end(); it++)  // percorre todos os trades do vetor e se o preço ficar constante vai somando as quantidades, a partir do momento que o preço muda, ele imprime os trades mostrando o preço "anterior" e a quantidade somada, depois disso atualiza com os novos valores e quantidades de trade
+    {
+        if(it->price == current_price)
+        {
+            total_quantity = total_quantity + it->quantity;
+        }
+        else
+        {
+            std::cout << "Trade, price: " << format_price(current_price) << ", qty: " << total_quantity << "\n";
+
+            total_quantity = it->quantity;
+            current_price = it->price;
+        }
+    }
+
+    std::cout << "Trade, price: " << format_price(current_price) << ", qty: " << total_quantity << "\n";  // essa parte é necessária porque como o for percorre o vetor mas nós sempre imprimimos com base na "casa anterior do vetor", ou com base na "soma" das "casas anteriores do vetor"; acaba que a "posição atual" só é impressa na próxima iteração e assim por diente, logo, quando chegamos na "última casa", estamos imprimindo a penúltima ainda. Dito isso, a última não é impressa dentro do for, por isso ao sair dele temos que fazer essa última impressão
+}
