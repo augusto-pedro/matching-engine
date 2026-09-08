@@ -56,18 +56,18 @@ int main()
         if(command == "help")
         {
             std::cout 
-                << "limit buy <price> <qty>\n"                         //falta aquele detalhe
-                << "limit sell <price> <qty>\n"                        //falta aquele detalhe
-                << "market buy <qty>\n"                                //ok
-                << "market sell <qty>\n"                               //ok
-                << "peg bid buy <qty>\n"                               //ok
-                << "peg offer sell <qty>\n"                            //ok
-                << "cancel order <order_id>\n"                         //ok
-                << "modify order <order_id> <price> <qty>\n"           //ok
-                << "modify peg <order_id> <qty>\n"                     //ok
-                << "print book\n"                                      //ok
-                << "print book aggregated\n"                           //ok
-                << "exit\n\n";                                         //ok
+                << "limit buy <price> <qty>\n"
+                << "limit sell <price> <qty>\n"
+                << "market buy <qty>\n"
+                << "market sell <qty>\n"
+                << "peg bid buy <qty>\n"
+                << "peg offer sell <qty>\n"
+                << "cancel order <order_id>\n"
+                << "modify order <order_id> <price> <qty>\n"
+                << "modify peg <order_id> <qty>\n"
+                << "print book\n"
+                << "print book aggregated\n"
+                << "exit\n\n";
             
             continue;
         }
@@ -100,7 +100,11 @@ int main()
                     << format_price(price)
                     << " order_"
                     << result.order_id
-                    << "\n\n";
+                    << "\n";
+                
+                print_trades(result.trades);
+
+                std::cout << "\n";
             }
             catch(const std::exception &error)
             {
