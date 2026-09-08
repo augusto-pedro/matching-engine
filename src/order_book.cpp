@@ -198,7 +198,7 @@ void OrderBook::print_book_aggregated()
 
     for(auto it = this->bids.begin(); it != this->bids.end(); it++)
     {
-        int total_quantity = 0;
+        long long total_quantity = 0;
 
         OrderNode *node = it->second.front();
 
@@ -216,7 +216,7 @@ void OrderBook::print_book_aggregated()
 
     for(auto it = this->offers.begin(); it != this->offers.end(); it++)
     {
-        int total_quantity = 0;
+        long long total_quantity = 0;
 
         OrderNode *node = it->second.front();
 
