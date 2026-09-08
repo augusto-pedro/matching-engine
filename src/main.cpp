@@ -32,6 +32,8 @@ int main()
             break;
         }
 
+        std::cout << "\n";
+
         std::istringstream input(line);  // pega a linha inteira digitada pelo usuário e permite lê-la "por pedaços" separados por espaços (input se comporta como se a string fosse uma entrada de teclado)
 
         std::string command;  // cria uma string chamda command
@@ -62,12 +64,12 @@ int main()
                 << "modify peg <order_id> <qty>\n"
                 << "print book\n"
                 << "print book aggregated\n"
-                << "exit\n";
+                << "exit\n\n";
             
             continue;
         }
 
-        std::cout << "Invalid command\n";
+        std::cout << "Invalid command\n\n";
     }
 
     return 0;
