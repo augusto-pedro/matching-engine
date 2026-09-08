@@ -7,6 +7,72 @@
 
 #include "matching_engine.hpp"
 
+bool parser_side(const std::string &text, Side &side);  // converte um texto para compra ou venda. Recebe um texto e se esse texto for buy ou sell, a variável side receberá Side::Buy ou Side::sell
+
+bool parser_price(const std::string &text, int &price);  // converte um texto para um preço em centavos
+
+bool parser_quantity(const std::string &text, int &quantity);  // converte um texto para uma quantidade
+
+bool parser_order(const std::string &text, unsigned long long &id);  // converte um texto para o ID de uma ordem
+
+int main()
+{
+    MatchingEngine engine;
+    std::string line;
+
+    std::cout << "Matching Engine\n";
+    std::cout << "Type 'help' for available commands\n\n";
+
+    while(true)
+    {
+        std::cout << ">>> ";
+
+        if(!std::getline(std::cin, line))  // std::getline(std::cin, line) lê uma linha inteira digitada pelo usuário e salva em line
+        {
+            break;
+        }
+
+        std::istringstream input(line);  // pega a linha inteira digitada pelo usuário e permite lê-la "por pedaços" separados por espaços (input se comporta como se a string fosse uma entrada de teclado)
+
+        std::string command;  // cria uma string chamda command
+
+        input >> command;  // pega a primeira palavra de input e coloca em command
+
+        if(command.empty())
+        {
+            continue;
+        }
+
+        if(command == "exit")
+        {
+            break;
+        }
+
+        if(command == "help")
+        {
+            std::cout 
+                << "limit buy <price> <qty>\n"
+                << "limit sell <price> <qty>\n"
+                << "market buy <qty>\n"
+                << "market sell <qty>\n"
+                << "peg bid buy <qty>\n"
+                << "peg offer sell <qty>\n"
+                << "cancel order <order_id>\n"
+                << "modify order <order_id> <price> <qty>\n"
+                << "modify peg <order_id> <qty>\n"
+                << "print book\n"
+                << "print book aggregated\n"
+                << "exit\n";
+            
+            continue;
+        }
+
+        std::cout << "Invalid command\n";
+    }
+
+    return 0;
+}
+
 bool parser_side(const std::string &text, Side &side)  // converte um texto para compra ou venda. Recebe um texto e se esse texto for buy ou sell, a variável side receberá Side::Buy ou Side::sell
 {
     if(text == "buy")
@@ -122,7 +188,7 @@ bool parser_quantity(const std::string &text, int &quantity)  // converte um tex
     return true;
 }
 
-bool parser_order(const std::string &text, unsigned long long &id)
+bool parser_order(const std::string &text, unsigned long long &id)  // converte um texto para o ID de uma ordem
 {
     const std::string prefix = "order_";
 
