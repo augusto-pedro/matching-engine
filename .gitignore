@@ -1,0 +1,9 @@
+*.exe
+
+matching_engine
+
+test_price_level
+test_order_book
+test_matching_engine
+
+.vscode/
