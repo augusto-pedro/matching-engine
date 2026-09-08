@@ -60,8 +60,8 @@ int main()
                 << "limit sell <price> <qty>\n"                        //falta aquele detalhe
                 << "market buy <qty>\n"                                //ok
                 << "market sell <qty>\n"                               //ok
-                << "peg bid buy <qty>\n"                               //
-                << "peg offer sell <qty>\n"                            //
+                << "peg bid buy <qty>\n"                               //ok
+                << "peg offer sell <qty>\n"                            //ok
                 << "cancel order <order_id>\n"                         //ok
                 << "modify order <order_id> <price> <qty>\n"           //ok
                 << "modify peg <order_id> <qty>\n"                     //
@@ -241,6 +241,57 @@ int main()
 
                 continue;
             }
+        }
+
+        if(command == "peg")
+        {
+            std::string reference_text, side_text, quantity_text;
+            PegReference reference;
+            Side side;
+            int quantity;
+            SubmissionResult result;
+
+            input >> reference_text >> side_text >> quantity_text;
+
+            if(reference_text == "bid" && side_text == "buy")
+            {
+                reference = PegReference::Bid;
+            }
+            else if(reference_text == "offer" && side_text == "sell")
+            {
+                reference = PegReference::Offer;
+            }
+            else
+            {
+                std::cout << "Invalid command\n\n";
+                continue;
+            }
+
+            if(!parser_side(side_text, side) || !parser_quantity(quantity_text, quantity))
+            {
+                std::cout << "Invalid command\n\n";
+                continue;
+            }
+
+            try
+            {
+                result = engine.submit_pegged_order(reference, quantity);
+
+                std::cout
+                    << "Order created: peg "
+                    << reference_text << " "
+                    << side_text << " "
+                    << quantity
+                    << " order_"
+                    << result.order_id
+                    << "\n\n";
+            }
+            catch(const std::exception &error)
+            {
+                std::cout << "Error: " << error.what() << "\n\n";
+            }
+
+            continue;
         }
 
         std::cout << "Invalid command\n\n";
