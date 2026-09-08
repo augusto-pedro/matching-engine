@@ -397,7 +397,16 @@ bool parser_price(const std::string &text, int &price)  // converte um texto par
         }
     }
 
-    long long whole_value = std::stoll(whole);  // converte a string para um long long. stoll é [S]tring [TO] [L]ong [L]ong
+    long long whole_value;
+
+    try  // esse try/catch é apenas para impedir que o programa quebre se um número extremamente grande for inserido
+    {
+        whole_value = std::stoll(whole);  // converte a string para um long long. stoll é [S]tring [TO] [L]ong [L]ong
+    }
+    catch(const std::exception &)
+    {
+        return false;
+    }
 
     int decimal_value = 0;
 
@@ -408,6 +417,11 @@ bool parser_price(const std::string &text, int &price)  // converte um texto par
     if(decimal.size() == 2)
     {
         decimal_value = (decimal[0] - '0') * 10 + (decimal[1] - '0');
+    }
+
+    if(whole_value > std::numeric_limits<int>::max() / 100)  // verifica se (whole_value * 100) estrapola o limite de um int
+    {
+        return false;
     }
 
     long long total = (whole_value * 100) + decimal_value;
@@ -437,7 +451,16 @@ bool parser_quantity(const std::string &text, int &quantity)  // converte um tex
         }
     }
 
-    long long value = std::stoll(text);
+    long long value;
+
+    try  // esse try/catch é apenas para impedir que o programa quebre se um número extremamente grande for inserido
+    {
+        value = std::stoll(text);
+    }
+    catch(const std::exception &)
+    {
+        return false;
+    }
 
     if(value <= 0 || value > std::numeric_limits<int>::max())
     {
@@ -473,7 +496,14 @@ bool parser_order(const std::string &text, unsigned long long &id)  // converte 
         }
     }
 
-    id = std::stoull(number);  // converte a string para um unsigned long long. stoull é [S]tring [TO] [U]nsigned [L]ong [L]ong
+    try  // esse try/catch é apenas para impedir que o programa quebre se um número extremamente grande for inserido
+    {
+        id = std::stoull(number);  // converte a string para um unsigned long long. stoull é [S]tring [TO] [U]nsigned [L]ong [L]ong
+    }
+    catch(const std::exception &)
+    {
+        return false;
+    }
 
     return id > 0;  // se id > 0 retorna true
 }
